@@ -6,6 +6,7 @@
 <title>Norte Club — Café del Norte</title>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;1,9..144,300;1,9..144,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
 <style>
 :root{--v:#1A4731;--vd:#060D08;--g:#C9A84C;--g2:#E8C96E;--c:#F5F0E6;--e:#2C1810;}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
@@ -145,6 +146,20 @@ body::before{content:"";position:fixed;inset:0;z-index:0;
 .action-icon{font-size:22px;margin-bottom:6px;}
 .action-lbl{font-size:11px;font-weight:500;color:rgba(245,240,230,0.7);}
 .action-sub{font-size:10px;color:rgba(245,240,230,0.35);margin-top:2px;}
+
+
+/* QR SCANNER */
+.qr-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:200;flex-direction:column;align-items:center;justify-content:center;padding:20px;}
+.qr-modal.on{display:flex;}
+.qr-video-wrap{position:relative;width:280px;height:280px;border-radius:16px;overflow:hidden;border:2px solid var(--g);}
+.qr-video-wrap video{width:100%;height:100%;object-fit:cover;}
+.qr-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;}
+.qr-frame{width:180px;height:180px;border:2px solid var(--g);border-radius:8px;box-shadow:0 0 0 9999px rgba(0,0,0,0.4);}
+.qr-corners::before,.qr-corners::after{content:"";position:absolute;width:24px;height:24px;border-color:var(--g);border-style:solid;}
+.qr-scan-line{position:absolute;width:160px;height:2px;background:linear-gradient(90deg,transparent,var(--g),transparent);animation:scanLine 2s ease-in-out infinite;}
+@keyframes scanLine{0%{top:50px;opacity:0;}20%{opacity:1;}80%{opacity:1;}100%{top:220px;opacity:0;}}
+.qr-status{margin-top:16px;font-size:13px;color:rgba(245,240,230,0.6);text-align:center;letter-spacing:0.5px;}
+.qr-status.found{color:var(--g);font-weight:500;}
 
 .loading{text-align:center;padding:30px;color:rgba(245,240,230,0.3);font-size:13px;}
 .scroll{flex:1;overflow-y:auto;padding:20px 20px 60px;}
@@ -990,10 +1005,117 @@ async function aprobar(recompensa){
   }catch(e){err.textContent='Error.';err.style.display='block';}
 }
 
+
+// ── QR SCANNER ────────────────────────────────────
+let scanStream = null;
+let scanInterval = null;
+
+async function openScanner() {
+  const modal = document.getElementById('qr-scanner-modal');
+  const video = document.getElementById('qr-video');
+  const status = document.getElementById('qr-status');
+  status.textContent = 'Iniciando cámara...';
+  status.className = 'qr-status';
+  modal.classList.add('on');
+
+  try {
+    scanStream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: 'environment', width: { ideal: 640 }, height: { ideal: 640 } }
+    });
+    video.srcObject = scanStream;
+    await video.play();
+    status.textContent = 'Buscando código QR...';
+    startScanning();
+  } catch(e) {
+    status.textContent = 'No se pudo acceder a la cámara. Usa la búsqueda manual.';
+    status.className = 'qr-status';
+  }
+}
+
+function startScanning() {
+  const video  = document.getElementById('qr-video');
+  const canvas = document.getElementById('qr-canvas');
+  const ctx    = canvas.getContext('2d');
+  const status = document.getElementById('qr-status');
+
+  scanInterval = setInterval(() => {
+    if (video.readyState !== video.HAVE_ENOUGH_DATA) return;
+    canvas.width  = video.videoWidth;
+    canvas.height = video.videoHeight;
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const code = jsQR(imageData.data, imageData.width, imageData.height, { inversionAttempts: 'dontInvert' });
+
+    if (code && code.data && code.data.startsWith('NC-')) {
+      status.textContent = '✦ Código encontrado: ' + code.data;
+      status.className = 'qr-status found';
+      closeScanner();
+      // Auto-buscar y seleccionar el cliente
+      buscarPorQR(code.data);
+    }
+  }, 200);
+}
+
+function closeScanner() {
+  const modal = document.getElementById('qr-scanner-modal');
+  modal.classList.remove('on');
+  if (scanInterval) { clearInterval(scanInterval); scanInterval = null; }
+  if (scanStream) { scanStream.getTracks().forEach(t => t.stop()); scanStream = null; }
+}
+
+async function buscarPorQR(clienteId) {
+  const res = document.getElementById('search-results');
+  const inp = document.getElementById('search-q');
+  inp.value = clienteId;
+  res.innerHTML = '<div class="loading">Buscando cliente...</div>';
+  try {
+    const r = await api({ action: 'getCliente', id: clienteId });
+    if (r.ok && r.cliente) {
+      // Mostrar resultado y seleccionar automáticamente
+      res.innerHTML = `
+        <div class="c-row" onclick="selClient('${r.cliente.id}')">
+          <div class="avatar" style="width:40px;height:40px;font-size:16px;">${r.cliente.nombre[0]}</div>
+          <div style="flex:1;">
+            <div style="font-family:'Fraunces',serif;font-size:15px;color:var(--c);">${r.cliente.nombre}</div>
+            <div style="font-size:11px;color:rgba(245,240,230,0.35);">${r.cliente.barrio||''} · ${r.cliente.sellos}/9 sellos</div>
+          </div>
+          <span style="color:var(--g);font-size:16px;">✦ QR leído</span>
+        </div>`;
+      // Auto-seleccionar después de 800ms
+      setTimeout(() => selClient(r.cliente.id), 800);
+    } else {
+      res.innerHTML = '<div class="loading">QR no reconocido. Busca manualmente.</div>';
+    }
+  } catch(e) {
+    res.innerHTML = '<div class="loading">Error al buscar. Intenta de nuevo.</div>';
+  }
+}
+
 window.onload=()=>{
   buildPin('staff-pin-grid','staff');
   buildPin('dueno-pin-grid','dueno');
 };
 </script>
+
+<!-- QR SCANNER MODAL -->
+<div id="qr-scanner-modal" class="qr-modal">
+  <div style="text-align:center;margin-bottom:20px;">
+    <div style="font-family:'Fraunces',serif;font-size:20px;color:var(--c);margin-bottom:4px;">Escanear QR</div>
+    <div style="font-size:12px;color:rgba(245,240,230,0.4);">Apunta la cámara al código del cliente</div>
+  </div>
+  <div class="qr-video-wrap">
+    <video id="qr-video" autoplay playsinline muted></video>
+    <canvas id="qr-canvas" style="display:none;"></canvas>
+    <div class="qr-overlay">
+      <div style="position:relative;width:180px;height:180px;">
+        <div class="qr-frame"></div>
+        <div class="qr-scan-line" id="scan-line"></div>
+      </div>
+    </div>
+  </div>
+  <div class="qr-status" id="qr-status">Buscando código QR...</div>
+  <button onclick="closeScanner()" style="margin-top:20px;padding:12px 28px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:12px;color:var(--c);font-size:14px;cursor:pointer;font-family:'Jost',sans-serif;">Cancelar</button>
+</div>
+
 </body>
 </html>
