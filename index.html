@@ -344,6 +344,68 @@ fbq('track', 'PageView');
 src="https://www.facebook.com/tr?id=2130544687794522&ev=PageView&noscript=1"
 /></noscript>
 <!-- End Meta Pixel Code -->
+
+<!-- Eventos personalizados Café del Norte -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+  function trackMeta(eventName, params = {}) {
+    if (typeof fbq === "function") {
+      fbq("trackCustom", eventName, params);
+      console.log("Evento Meta enviado:", eventName, params);
+    }
+  }
+
+  // CLICK WHATSAPP
+  document.querySelectorAll('a[href*="wa.me"], a[href*="whatsapp"]').forEach(function(el) {
+    el.addEventListener("click", function() {
+      trackMeta("ClickWhatsApp", {
+        content_name: "WhatsApp Café del Norte",
+        action: "click_whatsapp"
+      });
+    });
+  });
+
+  // CLICK MENÚ
+  document.querySelectorAll('a[href*="menu"]').forEach(function(el) {
+    el.addEventListener("click", function() {
+      trackMeta("ClickMenu", {
+        content_name: "Menú Café del Norte",
+        action: "click_menu"
+      });
+    });
+  });
+
+  // CLICK UBICACIÓN
+  document.querySelectorAll('a[href*="maps"], a[href*="goo.gl"], a[href*="google.com/maps"]').forEach(function(el) {
+    el.addEventListener("click", function() {
+      trackMeta("ClickUbicacion", {
+        content_name: "Ubicación Café del Norte",
+        action: "click_ubicacion"
+      });
+    });
+  });
+
+  // CLICK NORTE CLUB
+  document.querySelectorAll('a[href*="club"], a[href*="norte-club"]').forEach(function(el) {
+    el.addEventListener("click", function() {
+      trackMeta("ClickNorteClub", {
+        content_name: "Norte Club",
+        action: "click_norte_club"
+      });
+    });
+  });
+
+  // TIEMPO EN PÁGINA 30 SEGUNDOS
+  setTimeout(function() {
+    trackMeta("TiempoEnPagina30s", {
+      content_name: "Home Café del Norte",
+      seconds: 30
+    });
+  }, 30000);
+
+});
+</script>
   
 </head>
 <body>
