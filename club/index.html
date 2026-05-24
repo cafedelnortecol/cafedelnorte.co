@@ -885,6 +885,7 @@ async function loadDash(){
 }
 
 function renderDash(d){
+  const cont=document.getElementById('dash-content');
   const {kpis,clientes,actividad,pendientes,cuponerasActivas}=d;
   const dotsHtml=n=>Array.from({length:9}).map((_,i)=>`<div class="dot ${i<n?'on':'off'}"></div>`).join('');
   const cupTotales = cuponerasActivas ? cuponerasActivas.length : 0;
@@ -967,11 +968,8 @@ function renderDash(d){
       </div>`).join('')}
     </div>`:''}
   `;
-  // Guardar referencia global
-  window._dashCont = document.getElementById('dash-content');
+  
 }
-
-var cont = null;
 
 function abrirModal(id,nombre){
   S.redencionPend={id,nombre};
