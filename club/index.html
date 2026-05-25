@@ -239,8 +239,9 @@ body::before{content:"";position:fixed;inset:0;z-index:0;
     <div style="margin-bottom:13px;"><label class="lbl">WhatsApp</label><input class="inp" id="reg-phone" type="tel" placeholder="Ej. 315 820 4411"></div>
     <div style="margin-bottom:13px;"><label class="lbl">Correo electrónico</label><input class="inp" id="reg-email" type="email" placeholder="Ej. maria@gmail.com"></div>
     <div style="margin-bottom:20px;"><label class="lbl">Barrio / Urbanización</label><input class="inp" id="reg-barrio" type="text" placeholder="Ej. Doral, Villa Country..."></div>
+    <div style="margin-bottom:20px;"><label class="lbl">Fecha de nacimiento <span style="color:rgba(201,168,76,0.6);font-size:11px;">(Opcional — para tu regalo de cumpleaños 🎂)</span></label><input class="inp" id="reg-fechanac" type="date" style="color-scheme:dark;"></div>
     <div class="chk-wrap"><input type="checkbox" id="chk-datos"><label for="chk-datos">Acepto la <a href="../politica.html" target="_blank">Política de Tratamiento de Datos</a> de Café del Norte.</label></div>
-    <div class="chk-wrap" style="margin-bottom:24px;"><input type="checkbox" id="chk-promo"><label for="chk-promo">Acepto recibir promociones y novedades por correo. (Opcional)</label></div>
+    <div class="chk-wrap" style="margin-bottom:24px;"><input type="checkbox" id="chk-promo"><label for="chk-promo">Acepto recibir promociones de cumpleaños y novedades por correo y WhatsApp. (Opcional)</label></div>
     <button class="gold-btn" onclick="registrar()">Obtener mi tarjeta ✦</button>
   </div>
 </div>
@@ -588,20 +589,27 @@ async function lookup() {
 
 // ── REGISTRO ──────────────────────────────────────
 async function registrar() {
-  const nombre = document.getElementById('reg-name').value.trim();
-  const phone  = document.getElementById('reg-phone').value.trim();
-  const email  = document.getElementById('reg-email').value.trim();
-  const barrio = document.getElementById('reg-barrio').value.trim();
-  const datos  = document.getElementById('chk-datos').checked;
-  const promo  = document.getElementById('chk-promo').checked;
-  const err    = document.getElementById('reg-err');
+  const nombre    = document.getElementById('reg-name').value.trim();
+  const phone     = document.getElementById('reg-phone').value.trim();
+  const email     = document.getElementById('reg-email').value.trim();
+  const barrio    = document.getElementById('reg-barrio').value.trim();
+  const fechaNac  = document.getElementById('reg-fechanac').value.trim();
+  const datos     = document.getElementById('chk-datos').checked;
+  const promo     = document.getElementById('chk-promo').checked;
+  const err       = document.getElementById('reg-err');
   err.style.display='none';
   if (!nombre||!phone||!email||!barrio) { err.textContent='Completa todos los campos.'; err.style.display='block'; return; }
   if (!datos) { err.textContent='Debes aceptar la política de datos.'; err.style.display='block'; return; }
   const btn = document.querySelector('#s-c-register .gold-btn');
   btn.disabled=true; btn.textContent='Registrando...';
+  // Convertir fecha de yyyy-MM-dd a dd/MM/yyyy para el backend
+  let fechaNacFmt = '';
+  if (fechaNac) {
+    const [y,m,d] = fechaNac.split('-');
+    fechaNacFmt = d+'/'+m+'/'+y;
+  }
   try {
-    const r = await api({ action:'registrarCliente', nombre, whatsapp:phone, email, barrio, aceptaPromociones:promo });
+    const r = await api({ action:'registrarCliente', nombre, whatsapp:phone, email, barrio, aceptaPromociones:promo, fechaNac:fechaNacFmt });
     if (r.ok || r.cliente) { renderCard(r.cliente, []); go('s-c-card'); }
     else { err.textContent=r.msg||'Error.'; err.style.display='block'; }
   } catch(e) { err.textContent='Error de conexión.'; err.style.display='block'; }
