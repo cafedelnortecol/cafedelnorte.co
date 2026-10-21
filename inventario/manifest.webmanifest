@@ -1,0 +1,13 @@
+{
+  "name": "Inventario · Café del Norte",
+  "short_name": "Inventario CDN",
+  "start_url": "/inventario/",
+  "scope": "/inventario/",
+  "display": "standalone",
+  "background_color": "#0D1A14",
+  "theme_color": "#0D1A14",
+  "icons": [
+    { "src": "icono.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icono.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
