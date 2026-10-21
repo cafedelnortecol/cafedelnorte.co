@@ -2,11 +2,27 @@
 <html lang="es">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Inventario · Café del Norte</title>
 <meta name="theme-color" content="#0D1A14">
-<meta http-equiv="refresh" content="0; url=https://script.google.com/macros/s/AKfycbz_cic0Vmv7-Qr4d248Dy9tTiqixqhp_7TWYLLQxG7Tj-zNEhoSvjUvonM6gPhagE6LSg/exec">
-<style>body{margin:0;min-height:100vh;display:grid;place-items:center;background:#0D1A14;color:#F5F0E6;font-family:system-ui,sans-serif}a{color:#C9A84C}</style>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Inventario CDN">
+<link rel="apple-touch-icon" href="icono.png">
+<link rel="icon" type="image/png" href="icono.png">
+<link rel="manifest" href="manifest.webmanifest">
+<style>
+  html,body{margin:0;height:100%;background:#0D1A14;overflow:hidden}
+  iframe{position:fixed;inset:0;width:100%;height:100%;border:0;background:#0D1A14}
+  .alt{position:fixed;bottom:12px;left:0;right:0;text-align:center;font:12px system-ui,sans-serif;color:#857E70;z-index:-1}
+  .alt a{color:#C9A84C}
+</style>
 </head>
-<body><p>Abriendo inventario… <a href="https://script.google.com/macros/s/AKfycbz_cic0Vmv7-Qr4d248Dy9tTiqixqhp_7TWYLLQxG7Tj-zNEhoSvjUvonM6gPhagE6LSg/exec">Entrar</a></p></body>
+<body>
+<!-- La app vive en Google Apps Script; aquí se muestra dentro de cafedelnorte.co para que el enlace sea el del café. -->
+<iframe src="https://script.google.com/macros/s/AKfycbz_cic0Vmv7-Qr4d248Dy9tTiqixqhp_7TWYLLQxG7Tj-zNEhoSvjUvonM6gPhagE6LSg/exec"
+  allow="camera; clipboard-write; web-share; fullscreen" title="Inventario Café del Norte"></iframe>
+<p class="alt">¿No carga? <a href="https://script.google.com/macros/s/AKfycbz_cic0Vmv7-Qr4d248Dy9tTiqixqhp_7TWYLLQxG7Tj-zNEhoSvjUvonM6gPhagE6LSg/exec">Abrir directo</a></p>
+</body>
 </html>
