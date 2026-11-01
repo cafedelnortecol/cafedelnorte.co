@@ -1,0 +1,13 @@
+{
+  "name": "POS Contingencia · Café del Norte",
+  "short_name": "POS CDN",
+  "start_url": "/poscontingencia/",
+  "scope": "/poscontingencia/",
+  "display": "standalone",
+  "background_color": "#0D1A14",
+  "theme_color": "#0D1A14",
+  "icons": [
+    { "src": "icono.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icono.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
