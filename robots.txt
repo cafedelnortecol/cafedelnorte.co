@@ -1,4 +1,6 @@
 User-agent: *
 Allow: /
+Disallow: /inventario/
+Disallow: /poscontingencia/
 
 Sitemap: https://cafedelnorte.co/sitemap.xml
